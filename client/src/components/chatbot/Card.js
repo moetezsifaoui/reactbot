@@ -1,8 +1,8 @@
 import React from 'react';
 const Card = (props) => (
-<div style={{ float: 'left', paddingRight: 30, width: 270}}>
-    <div className="card">
-        <div className="card-image" style={{ width: 240}}>
+<div style={{ float: 'left', paddingRight: 30,  width: 200}}>
+    <div className="card" >
+        <div className="card-image" style={{ width: 170, height:50}}>
             <img alt={props.payload.fields.header.stringValue} src={props.payload.fields.image.stringValue} />
                 <span className="card-title">{props.payload.fields.header.stringValue}</span>
         </div>

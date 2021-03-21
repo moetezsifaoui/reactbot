@@ -4,15 +4,17 @@ class QuickReplies extends Component {
     constructor(props) {
         super(props);
         this._handleClick = this._handleClick.bind(this);
+        console.log("=======> constructeur replies");
     }
     _handleClick(event, payload, text) {
         this.props.replyClick(event, payload, text);
-
+        console.log("=======> click replies");
     }
 
 
     renderQuickReply(reply, i) {
         return <QuickReply key={i} click={this._handleClick} reply={reply} />;
+        console.log("=======> render replies hedha component");
     }
 
 
@@ -20,10 +22,12 @@ class QuickReplies extends Component {
         if (quickReplies) {
             return quickReplies.map((reply, i) => {
                 return this.renderQuickReply(reply, i);
+                console.log("=======> render if");
                 }
             )
         } else {
             return null;
+            console.log("=======> render else");
         }
     }
 

@@ -12,8 +12,12 @@ class Chatbot extends Component {
         super(props);
         this._handleInputKeyPress = this._handleInputKeyPress.bind(this);
         this._handleQuickReplyPayload = this._handleQuickReplyPayload.bind(this);
+        this.hide = this.hide.bind(this);
+        this.show = this.show.bind(this);
         this.state = {
-            messages: []
+            messages: [],
+            showBot: true,
+            shopWelcomeSent: false
         };
         if (cookies.get('userID') === undefined) {
         cookies.set('userID', uuid(), { path: '/'});
@@ -54,21 +58,55 @@ class Chatbot extends Component {
         }
     }
 
-    componentDidMount() {
+    resolveAfterXSeconds(x) {
+        return new Promise( resolve => {
+            setTimeout(() => {
+                resolve(x);
+            }, x*1000)
+        });
+    }
+
+  async componentDidMount() {
         this.df_event_query('Welcome');
-        console.log("================444444");
+        if (window.location.pathname === '/' && !this.state.shopWelcomeSent) {
+            await this.resolveAfterXSeconds(2);
+            this.df_event_query('WELCOME_KHEDMAWNOS');
+            this.setState({shopWelcomeSent: true});
+        }
     }
 
     componentDidUpdate() {
         this.messagesEnd.scrollIntoView({ behavior: "smooth"});
         console.log("================>333333");
+
     }
 
+    show(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.setState({showBot: true});
+    }
+
+    hide(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.setState({showBot: false});
+    }
 
     _handleQuickReplyPayload(event, payload, text) {
         event.preventDefault();
         event.stopPropagation();
-        this.df_text_query(text);
+
+        switch (payload) {
+            case 'recommended_yes':
+
+                this.df_event_query('SHOW_RECOMMENDATIONS');
+
+            default:
+                this.df_text_query(text);
+                break;
+        }
+
     }
 
     renderCards(cards) {
@@ -78,7 +116,7 @@ class Chatbot extends Component {
 
     renderOneMessage(message, i) {
         if (message.msg && message.msg.text && message.msg.text.text){
-            return <Message key={i} speaks={message.speaks} text={message.msg.text.text} />;
+            return <Message key={i} speaks={message.speaks} text={message.msg.text.text} />
         }else if(message.msg && message.msg.payload.fields.cards) {
 
             return <div key={i}>
@@ -105,7 +143,7 @@ class Chatbot extends Component {
             return <QuickReplies
             text={message.msg.payload.fields.text ? message.msg.payload.fields.text : null}
             key={i}
-            replyClick={this._handleQuickReplayPayload}
+            replyClick={this._handleQuickReplyPayload}
             speaks={message.speaks}
             payload={message.msg.payload.fields.quick_replies.listValue.values}/>;
 
@@ -133,26 +171,72 @@ class Chatbot extends Component {
     }
 
     render() {
-        return (
-            <div style={{ height:500, width:400, position: 'absolute', bottom: 0, right: 0, border: '1px solid grey' }}>
-                <nav>
-                    <div className="nav-wrapper">
-                        <a className="brand-logo">Willy</a>
-                    </div>
-                </nav>
+        if (this.state.showBot) {
+            return (
+                <div style={{
+                    height: 500,
+                    width: 400,
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    border: '1px solid grey'
+                }}>
+                    <nav>
+                        <div className="nav-wrapper">
+                            <a className="brand-logo">Willy</a>
+                            <ul id="nav-mobile" className="right hide-on-med-and-down">
+                                <li>
+                                    <a onClick={this.hide}>Close</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
 
-                <div id="chatbot" style={{ height: 388, width:'100%', overflow: 'auto'}}>
-                {this.renderMessages(this.state.messages)}
-                    <div ref={(el) => { this.messagesEnd = el; }}
-                        style={{ float: 'left', clear: "both"}}>
+                    <div id="chatbot" style={{height: 388, width: '100%', overflow: 'auto'}}>
+                        {this.renderMessages(this.state.messages)}
+                        <div ref={(el) => {
+                            this.messagesEnd = el;
+                        }}
+                             style={{float: 'left', clear: "both"}}>
 
+                        </div>
                     </div>
-                      </div>
-                <div className="col s12">
-                <input style={{margin: 0, paddingLeft: '1%', paddingRight: '1%', width: '98%'}} placeholder="Chat with Willy.." type="text" onKeyPress={this._handleInputKeyPress}/>
+                    <div className="col s12">
+                        <input style={{margin: 0, paddingLeft: '1%', paddingRight: '1%', width: '98%'}}
+                               placeholder="Chat with Willy.." type="text" onKeyPress={this._handleInputKeyPress}/>
+                    </div>
                 </div>
-            </div>
-        )
+            );
+        } else {
+            return (
+                <div style={{
+                    height: 40,
+                    width: 400,
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    border: '1px solid grey'
+                }}>
+                    <nav>
+                        <div className="nav-wrapper">
+                            <a className="brand-logo">Willy</a>
+                            <ul id="nav-mobile" className="right hide-on-med-and-down">
+                                <li>
+                                    <a onClick={this.show}>Show</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
+                    <div ref={(el) => {
+                        this.messagesEnd = el;
+                    }}
+                         style={{float: 'left', clear: "both"}}>
+
+                    </div>
+
+                </div>
+            );
+        }
     }
 
 }

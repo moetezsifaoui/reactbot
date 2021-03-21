@@ -2,13 +2,14 @@ const express = require('express');
  const bodyParser = require ('body-parser');
  const app = express();
 
- app.use(bodyParser.json());
+const config = require('./config/keys');
+let mongoose = require('mongoose');
+mongoose.connect(config.mongoURI, { useNewUrlParser: true});
+require('./models/Registration');
+app.use(bodyParser.json());
 
  require('./routes/dialogFlowRoutes')(app);
 
 
-
 const PORT = process.env.PORT || 5000;
-
-
  app.listen(PORT);
